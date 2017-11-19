@@ -12,7 +12,7 @@ The function or source term takes the following linear form.
 
 |equation3|
 
-In general, parameters |a| and |b| are functions of the independent variable |x|, but since the material is homogeneous (no spatially varying physical properties), they are treated as constants. 
+In general, parameters |a| and |b| are functions of the independent variable |x|, but since the material is homogeneous (no spatially varying physical properties), they remain unchanged throughout the domain. 
 
 Note that boundary conditions are prescribed to match those required for the analytical solution.
 
