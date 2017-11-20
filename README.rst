@@ -70,17 +70,6 @@ Fortran version::
   cd ./src/fortran/
   ./diffusion_equation_with_linear_source
 
-Python version::
-
-  cd ./diffusion_equation_with_linear_source/src/python
-  source  /path/to/opencmisslibs/install/.../.../virtualenvironments/oclibs_pyXY_release/bin/activate
-  python diffusion_equation_with_linear_source.py
-
-  Note: If the above fails, try the following.
-  
-  cd ./diffusion_equation_with_linear_source/src/python
-  PYTHONPATH="/path/to/opencmisslibs/install/.../.../Release/opencmiss.iron" python diffusion_equation_with_linear_source.py  
-
 Verifying the example
 =====================
 Results can be visualised by running `visualise.cmgui <./src/fortran/visualise.cmgui>`_ with the `Cmgui visualiser <http://physiomeproject.org/software/opencmiss/cmgui/download>`_.
