@@ -78,15 +78,20 @@ PROGRAM DiffusionEquationWithLinearSource
 
   !Intialise OpenCMISS
   CALL cmfe_Initialise(worldCoordinateSystem,worldRegion,err)
+  
   !Set the random seeds so we can test multi process
   CALL cmfe_RandomSeedsSet(9999,err)
+  
   !Get the computational nodes information
   CALL cmfe_ComputationalNumberOfNodesGet(numberOfComputationalNodes,err)
   CALL cmfe_ComputationalNodeNumberGet(computationalNodeNumber,err)
 
+  !Set output on
+  CALL cmfe_OutputSetOn("DiffusionWithLinearSource",err)
+
   numberOfGlobalXElements=2
   numberOfGlobalYElements=4
-  numberOfGlobalZElements=8
+  numberOfGlobalZElements=4
 
   !-----------------------------------------------------------------------------------------------------------
   ! COORDINATE SYSTEM
@@ -264,7 +269,7 @@ PROGRAM DiffusionEquationWithLinearSource
   !Set the equations matrices sparsity type
   CALL cmfe_Equations_SparsityTypeSet(equations,CMFE_EQUATIONS_SPARSE_MATRICES,err)
   !Set the equations set output
-  !CALL cmfe_Equations_OutputTypeSet(equations,CMFE_EQUATIONS_NO_OUTPUT,err)
+  CALL cmfe_Equations_OutputTypeSet(equations,CMFE_EQUATIONS_NO_OUTPUT,err)
   !CALL cmfe_Equations_OutputTypeSet(equations,CMFE_EQUATIONS_TIMING_OUTPUT,err)
   !CALL cmfe_Equations_OutputTypeSet(equations,CMFE_EQUATIONS_MATRIX_OUTPUT,err)
   !CALL cmfe_Equations_OutputTypeSet(equations,CMFE_EQUATIONS_ELEMENT_MATRIX_OUTPUT,err)
@@ -292,7 +297,9 @@ PROGRAM DiffusionEquationWithLinearSource
   !Get the control loop
   CALL cmfe_Problem_ControlLoopGet(problem,CMFE_CONTROL_LOOP_NODE,controlLoop,err)
   !Set the times
-  CALL cmfe_ControlLoop_TimesSet(controlLoop,0.0_CMISSRP,1.0001_CMISSRP,0.001_CMISSRP,err)
+  CALL cmfe_ControlLoop_TimesSet(controlLoop,0.0_CMISSRP,1.0000_CMISSRP,0.005_CMISSRP,err)
+  !Set the output
+  CALL cmfe_ControlLoop_OutputTypeSet(controlLoop,CMFE_CONTROL_LOOP_PROGRESS_OUTPUT,err)
   !Finish creating the problem control loop
   CALL cmfe_Problem_ControlLoopCreateFinish(problem,err)
 
@@ -305,11 +312,11 @@ PROGRAM DiffusionEquationWithLinearSource
   CALL cmfe_Solver_Initialise(linearSolver,err)
   CALL cmfe_Problem_SolversCreateStart(problem,err)
   CALL cmfe_Problem_SolverGet(problem,CMFE_CONTROL_LOOP_NODE,1,solver,err)
-  !CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_NO_OUTPUT,err)
+  CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_NO_OUTPUT,err)
   !CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_PROGRESS_OUTPUT,err)
   !CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_TIMING_OUTPUT,err)
   !CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_SOLVER_OUTPUT,err)
-  CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_PROGRESS_OUTPUT,err)
+  !CALL cmfe_Solver_OutputTypeSet(solver,CMFE_SOLVER_MATRIX_OUTPUT,err)
   CALL cmfe_Solver_DynamicLinearSolverGet(solver,linearSolver,err)
   CALL cmfe_Solver_LinearIterativeMaximumIterationsSet(linearSolver,1000,err)
   !Finish the creation of the problem solver
