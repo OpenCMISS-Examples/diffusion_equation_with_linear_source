@@ -42,7 +42,9 @@ PROGRAM DiffusionEquationWithLinearSource
   !CMISS variables
   TYPE(cmfe_BasisType) :: basis
   TYPE(cmfe_BoundaryConditionsType) :: boundaryConditions
-  TYPE(cmfe_CoordinateSystemType) :: coordinateSystem,worldCoordinateSystem
+  TYPE(cmfe_ComputationEnvironmentType) :: computationEnvironment
+  TYPE(cmfe_ContextType) :: context
+  TYPE(cmfe_CoordinateSystemType) :: coordinateSystem
   TYPE(cmfe_DecompositionType) :: decomposition
   TYPE(cmfe_EquationsType) :: equations
   TYPE(cmfe_EquationsSetType) :: equationsSet
@@ -77,14 +79,20 @@ PROGRAM DiffusionEquationWithLinearSource
   !-----------------------------------------------------------------------------------------------------------
 
   !Intialise OpenCMISS
-  CALL cmfe_Initialise(worldCoordinateSystem,worldRegion,err)
+  CALL cmfe_Context_Initialise(context,err)
+  CALL cmfe_Initialise(context,err)
+  CALL cmfe_ErrorHandlingModeSet(CMFE_ERRORS_TRAP_ERROR,err)
+  CALL cmfe_Region_Initialise(worldRegion,err)
+  CALL cmfe_Context_WorldRegionGet(context,worldRegion,err)
   
   !Set the random seeds so we can test multi process
-  CALL cmfe_RandomSeedsSet(9999,err)
+  CALL cmfe_Context_RandomSeedsSet(context,9999,err)
   
   !Get the computational nodes information
-  CALL cmfe_ComputationalNumberOfNodesGet(numberOfComputationalNodes,err)
-  CALL cmfe_ComputationalNodeNumberGet(computationalNodeNumber,err)
+  CALL cmfe_ComputationEnvironment_Initialise(computationEnvironment,err)
+  CALL cmfe_Context_ComputationEnvironmentGet(context,computationEnvironment,err)
+  CALL cmfe_ComputationEnvironment_NumberOfWorldNodesGet(computationEnvironment,numberOfComputationalNodes,err)
+  CALL cmfe_ComputationEnvironment_WorldNodeNumberGet(computationEnvironment,computationalNodeNumber,err)
 
   !Set output on
   CALL cmfe_OutputSetOn("DiffusionWithLinearSource",err)
@@ -99,7 +107,7 @@ PROGRAM DiffusionEquationWithLinearSource
   
   !Start the creation of a new RC coordinate system
   CALL cmfe_CoordinateSystem_Initialise(coordinateSystem,err)
-  CALL cmfe_CoordinateSystem_CreateStart(coordinateSystemUserNumber,coordinateSystem,err)
+  CALL cmfe_CoordinateSystem_CreateStart(coordinateSystemUserNumber,context,coordinateSystem,err)
   IF(numberOfGlobalZElements==0) THEN
     !Set the coordinate system to be 2D
     CALL cmfe_CoordinateSystem_DimensionSet(coordinateSystem,2,err)
@@ -129,7 +137,7 @@ PROGRAM DiffusionEquationWithLinearSource
   
   !Start the creation of a basis (default is trilinear lagrange)
   CALL cmfe_Basis_Initialise(basis,err)
-  CALL cmfe_Basis_CreateStart(basisUserNumber,basis,err)
+  CALL cmfe_Basis_CreateStart(basisUserNumber,context,basis,err)
   IF(numberOfGlobalZElements==0) THEN
     !Set the basis to be a biquadratic Lagrange basis
     CALL cmfe_Basis_NumberOfXiSet(basis,2,err)
@@ -282,8 +290,8 @@ PROGRAM DiffusionEquationWithLinearSource
   
   !Create the problem
   CALL cmfe_Problem_Initialise(problem,err)
-  CALL cmfe_Problem_CreateStart(problemUserNumber,[CMFE_PROBLEM_CLASSICAL_FIELD_CLASS,CMFE_PROBLEM_DIFFUSION_EQUATION_TYPE, &
-    & CMFE_PROBLEM_LINEAR_SOURCE_DIFFUSION_SUBTYPE],problem,err)
+  CALL cmfe_Problem_CreateStart(problemUserNumber,context,[CMFE_PROBLEM_CLASSICAL_FIELD_CLASS, &
+    & CMFE_PROBLEM_DIFFUSION_EQUATION_TYPE,CMFE_PROBLEM_LINEAR_SOURCE_DIFFUSION_SUBTYPE],problem,err)
   !Finish the creation of a problem.
   CALL cmfe_Problem_CreateFinish(problem,err)
 
@@ -369,7 +377,7 @@ PROGRAM DiffusionEquationWithLinearSource
   CALL cmfe_Fields_ElementsExport(fields,"diffusion_equation_linear_source","FORTRAN",err)
   CALL cmfe_Fields_Finalise(fields,err)
 
-  CALL cmfe_Finalise(err)
+  CALL cmfe_Finalise(context,err)
   WRITE(*,'(A)') "Program successfully completed."
   
   STOP
