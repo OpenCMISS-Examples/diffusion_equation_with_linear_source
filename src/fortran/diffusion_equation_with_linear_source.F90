@@ -18,6 +18,7 @@ PROGRAM DiffusionEquationWithLinearSource
   REAL(CMISSRP), PARAMETER :: WIDTH=2.0_CMISSRP/2.0_CMISSRP
   REAL(CMISSRP), PARAMETER :: LENGTH=3.0_CMISSRP
   
+  INTEGER(CMISSIntg), PARAMETER :: contextUserNumber=1
   INTEGER(CMISSIntg), PARAMETER :: coordinateSystemUserNumber=1
   INTEGER(CMISSIntg), PARAMETER :: regionUserNumber=1
   INTEGER(CMISSIntg), PARAMETER :: basisUserNumber=1
@@ -82,8 +83,13 @@ PROGRAM DiffusionEquationWithLinearSource
   !-----------------------------------------------------------------------------------------------------------
 
   !Intialise OpenCMISS
+  CALL cmfe_Initialise(err)
+  CALL cmfe_ErrorHandlingModeSet(CMFE_ERRORS_TRAP_ERROR,err)
+  !Set output on
+  CALL cmfe_OutputSetOn("DiffusionWithLinearSource",err)
+  !Create a context
   CALL cmfe_Context_Initialise(context,err)
-  CALL cmfe_Initialise(context,err)
+  CALL cmfe_Context_Create(contextUserNumber,context,err)
   CALL cmfe_ErrorHandlingModeSet(CMFE_ERRORS_TRAP_ERROR,err)
   CALL cmfe_Region_Initialise(worldRegion,err)
   CALL cmfe_Context_WorldRegionGet(context,worldRegion,err)
@@ -100,9 +106,9 @@ PROGRAM DiffusionEquationWithLinearSource
   CALL cmfe_WorkGroup_NumberOfGroupNodesGet(worldWorkGroup,numberOfComputationalNodes,err)
   CALL cmfe_WorkGroup_GroupNodeNumberGet(worldWorkGroup,computationalNodeNumber,err)
 
-  !Set output on
-  CALL cmfe_OutputSetOn("DiffusionWithLinearSource",err)
-
+  !numberOfGlobalXElements=3
+  !numberOfGlobalYElements=3
+  !numberOfGlobalZElements=3
   numberOfGlobalXElements=2
   numberOfGlobalYElements=4
   numberOfGlobalZElements=4
@@ -147,12 +153,16 @@ PROGRAM DiffusionEquationWithLinearSource
   IF(numberOfGlobalZElements==0) THEN
     !Set the basis to be a biquadratic Lagrange basis
     CALL cmfe_Basis_NumberOfXiSet(basis,2,err)
+    !CALL cmfe_Basis_InterpolationXiSet(basis,[CMFE_BASIS_LINEAR_LAGRANGE_INTERPOLATION, &
+    !  & CMFE_BASIS_LINEAR_LAGRANGE_INTERPOLATION],err)    
     CALL cmfe_Basis_InterpolationXiSet(basis,[CMFE_BASIS_QUADRATIC_LAGRANGE_INTERPOLATION, &
       & CMFE_BASIS_QUADRATIC_LAGRANGE_INTERPOLATION],err)    
     CALL cmfe_Basis_QuadratureNumberOfGaussXiSet(basis,[3,3],err)
   ELSE
     !Set the basis to be a triquadratic Lagrange basis
     CALL cmfe_Basis_NumberOfXiSet(basis,3,err)
+    !CALL cmfe_Basis_InterpolationXiSet(basis,[CMFE_BASIS_LINEAR_LAGRANGE_INTERPOLATION, &
+    !  & CMFE_BASIS_LINEAR_LAGRANGE_INTERPOLATION,CMFE_BASIS_LINEAR_LAGRANGE_INTERPOLATION],err)    
     CALL cmfe_Basis_InterpolationXiSet(basis,[CMFE_BASIS_QUADRATIC_LAGRANGE_INTERPOLATION, &
       & CMFE_BASIS_QUADRATIC_LAGRANGE_INTERPOLATION,CMFE_BASIS_QUADRATIC_LAGRANGE_INTERPOLATION],err)    
     CALL cmfe_Basis_QuadratureNumberOfGaussXiSet(basis,[3,3,3],err)
@@ -393,7 +403,12 @@ PROGRAM DiffusionEquationWithLinearSource
   CALL cmfe_Fields_ElementsExport(fields,"diffusion_equation_linear_source","FORTRAN",err)
   CALL cmfe_Fields_Finalise(fields,err)
 
-  CALL cmfe_Finalise(context,err)
+
+  !Destroy the context
+  CALL cmfe_Context_Destroy(context,err)
+  !Finalise OpenCMISS
+  CALL cmfe_Finalise(err)
+  
   WRITE(*,'(A)') "Program successfully completed."
   
   STOP
