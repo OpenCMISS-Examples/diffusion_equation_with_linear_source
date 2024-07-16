@@ -56,9 +56,10 @@ Building the example
 The fortran version of the example can be configured and built with CMake::
 
   git clone https://github.com/OpenCMISS-Examples/diffusion_equation_with_linear_source
-  mkdir diffusion_equation_with_linear_source-build
-  cd diffusion_equation_with_linear_source-build
-  cmake -DOpenCMISSLibs_DIR=/path/to/opencmisslib/install ../diffusion_equation_with_linear_source
+  cd diffusion_equation_with_linear_source
+  mkdir build
+  cd build
+  cmake -DOpenCMISS_INSTALL_ROOT=/path/to/opencmiss/install ../.
   make
 
 This will create the example executable "diffusion_equation_with_linear_source" in ./src/fortran/ directory.
